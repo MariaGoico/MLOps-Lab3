@@ -42,3 +42,16 @@ def random_flip(image: Image.Image):
     if random.random() > 0.5:
         return ImageOps.mirror(image)
     return image
+
+""" Full preprocessing pipeline (example) """
+def preprocess(image_path):
+    image = Image.open(image_path)
+
+    # Apply a few steps
+    image = resize(image_path)              # random resize
+    image = to_grayscale(image)             # grayscale
+    image = random_rotate(image)            # slight rotation
+    image = random_flip(image)              # maybe flip
+    image = blur(image)                     # blur a bit
+
+    return image

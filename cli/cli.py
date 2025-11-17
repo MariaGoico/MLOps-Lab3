@@ -1,5 +1,15 @@
 import click
-from logic.utilities import predict, resize
+from logic.utilities import (
+    predict,
+    resize,
+    to_grayscale,
+    normalize,
+    random_rotate,
+    blur,
+    random_flip,
+    preprocess as preprocess_pipeline,
+)
+from PIL import Image
 
 
 # ─────────────────────────────
@@ -77,6 +87,73 @@ def preprocess_resize(image_path, output_path):
     img.save(output_path)
     click.echo(f"Saved resized image to: {output_path}")
 
+# --- Grayscale Command ---
+@preprocess.command(
+    name="grayscale",
+    help="Convert image to grayscale."
+)
+@click.argument("image_path")
+@click.argument("output_path")
+def preprocess_grayscale(image_path, output_path):
+    img = Image.open(image_path)
+    img = to_grayscale(img)
+    img.save(output_path)
+    click.echo(f"Saved grayscale image to: {output_path}")
+
+
+# --- Rotate Command ---
+@preprocess.command(
+    name="rotate",
+    help="Randomly rotate the image by up to ±20 degrees."
+)
+@click.argument("image_path")
+@click.argument("output_path")
+def preprocess_rotate(image_path, output_path):
+    img = Image.open(image_path)
+    img = random_rotate(img)
+    img.save(output_path)
+    click.echo(f"Saved rotated image to: {output_path}")
+
+
+# --- Flip Command ---
+@preprocess.command(
+    name="flip",
+    help="Randomly flip the image horizontally (50% probability)."
+)
+@click.argument("image_path")
+@click.argument("output_path")
+def preprocess_flip(image_path, output_path):
+    img = Image.open(image_path)
+    img = random_flip(img)
+    img.save(output_path)
+    click.echo(f"Saved flipped image to: {output_path}")
+
+
+# --- Blur Command ---
+@preprocess.command(
+    name="blur",
+    help="Apply Gaussian blur to the image."
+)
+@click.argument("image_path")
+@click.argument("output_path")
+def preprocess_blur(image_path, output_path):
+    img = Image.open(image_path)
+    img = blur(img)
+    img.save(output_path)
+    click.echo(f"Saved blurred image to: {output_path}")
+
+
+# --- Full Pipeline Command ---
+@preprocess.command(
+    name="pipeline",
+    help="Apply full preprocessing pipeline (resize, grayscale, rotate, flip, blur)."
+)
+@click.argument("image_path")
+@click.argument("output_path")
+def preprocess_full_pipeline(image_path, output_path):
+    img = preprocess_pipeline(image_path)
+    img.save(output_path)
+    click.echo(f"Saved fully preprocessed image to: {output_path}")
 
 # ─────────────────────────────
 # ENTRY POINT
