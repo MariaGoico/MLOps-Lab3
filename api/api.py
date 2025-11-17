@@ -1,42 +1,100 @@
-from fastapi import FastAPI, UploadFile, File
-from fastapi.responses import FileResponse
-import tempfile
+import uvicorn
+from fastapi import FastAPI, UploadFile, File, Form
+from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.templating import Jinja2Templates
+from fastapi.staticfiles import StaticFiles
+from fastapi import Request
+from pathlib import Path
+import io
+from PIL import Image
+
 from logic.utilities import predict, resize
 
-app = FastAPI(title="Image Processing API", version="1.0")
+app = FastAPI(
+    title="API of the Lab 1 using FastAPI",
+    description="API to perform preprocessing on images",
+    version="1.0.0",
+)
+
+# Serve templates and static files
+templates = Jinja2Templates(directory="templates")
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-# ─────────────────────────────
-# PREDICT ENDPOINT
-# ─────────────────────────────
+# ---------------------------------------------------------
+# Home Page
+# ---------------------------------------------------------
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request):
+    """
+    Render the HTML homepage.
+    """
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+# ---------------------------------------------------------
+# Predict Endpoint
+# ---------------------------------------------------------
 @app.post("/predict")
-async def predict_endpoint(classes: list[str]):
+async def predict_class(
+    class1: str = Form(..., description="First class"),
+    class2: str = Form(..., description="Second class"),
+    class3: str = Form(..., description="Third class"),
+    class4: str = Form(..., description="Fourth class")
+):
     """
-    Predict a random class from a provided list.
+    Receive exactly 4 classes for prediction.
     """
-    result = predict(classes)
-    return {"predicted_class": result}
+    class_list = [class1, class2, class3, class4]
+    
+    try:
+        result = predict(class_list)
+        return {"predicted_class": result}
+    except Exception as e:
+        return {"error": f"Prediction failed: {str(e)}"}
 
-
-# ─────────────────────────────
-# RESIZE ENDPOINT
-# ─────────────────────────────
+    
+# ---------------------------------------------------------
+# Resize Endpoint
+# ---------------------------------------------------------
 @app.post("/resize")
-async def resize_endpoint(file: UploadFile = File(...)):
+async def resize_image(
+    file: UploadFile = File(...),
+):
     """
-    Upload an image → resize → return resized image.
+    Resize an uploaded image to a random size between 28 and 225.
+
+    The user uploads a binary image. We convert it using PIL,
+    send it through the resize() logic method, and return it.
     """
-    # Save uploaded file to temporary location
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_input:
-        temp_input.write(await file.read())
-        temp_input_path = temp_input.name
 
-    # Resize the image
-    resized_image = resize(temp_input_path)
+    try:
+        # Read file bytes
+        contents = await file.read()
+        image = Image.open(io.BytesIO(contents)).convert("RGB")
 
-    # Save resized image to temporary output file
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".png") as temp_output:
-        resized_image.save(temp_output.name)
-        temp_output_path = temp_output.name
+        # Save the uploaded image temporarily
+        input_path = Path("temp_input.jpg")
+        input_path.write_bytes(contents)
 
-    return FileResponse(temp_output_path, media_type="image/png")
+        # Apply random resize using your utilities
+        resized_img = resize(str(input_path))
+
+        # Save to a bytes buffer to return
+        buf = io.BytesIO()
+        resized_img.save(buf, format="JPEG")
+        buf.seek(0)
+
+        return FileResponse(
+            buf,
+            media_type="image/jpeg",
+            filename="resized.jpg",
+        )
+
+    except Exception as e:
+        return {"error": f"Could not process image: {str(e)}"}
+    
+
+# Entry point (for direct execution only)
+if __name__ == "__main__":
+    uvicorn.run("api.api:app", host="0.0.0.0", port=8000, reload=True)
