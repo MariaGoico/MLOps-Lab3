@@ -9,7 +9,7 @@ from pathlib import Path
 import io
 from PIL import Image
 
-from logic.utilities import predict, resize
+from logic.utilities import predict, resize, ensure_output_dir
 
 app = FastAPI(
     title="API of the Lab 1 using FastAPI",
@@ -38,22 +38,33 @@ async def home(request: Request):
 # ---------------------------------------------------------
 @app.post("/predict")
 async def predict_class(
-    class1: str = Form(..., description="First class"),
-    class2: str = Form(..., description="Second class"),
-    class3: str = Form(..., description="Third class"),
-    class4: str = Form(..., description="Fourth class")
+    file: UploadFile = File(...),
 ):
     """
-    Receive exactly 4 classes for prediction.
-    """
-    class_list = [class1, class2, class3, class4]
+    Predict a random class for an uploaded image.
+    The classes are hardcoded for now (dog, cat, bird, fish).
     
+    Args:
+        file: The image file to classify
+        
+    Returns:
+        dict: The predicted class
+    """
     try:
-        result = predict(class_list)
-        return {"predicted_class": result}
+        # Read the uploaded file to validate it's an image
+        contents = await file.read()
+        image = Image.open(io.BytesIO(contents)).convert("RGB")
+        
+        # Predict (randomly selects one class)
+        result = predict(image)
+
+        return {
+            "predicted_class": result,
+            "filename": file.filename
+        }
+
     except Exception as e:
         return {"error": f"Prediction failed: {str(e)}"}
-
     
 # ---------------------------------------------------------
 # Resize Endpoint
@@ -61,16 +72,25 @@ async def predict_class(
 @app.post("/resize")
 async def resize_image(
     file: UploadFile = File(...),
+    width: int = Form(None),
+    height: int = Form(None),
 ):
     """
-    Resize an uploaded image to a random size between 28 and 225.
+    Resize an uploaded image to specified dimensions.
+    If width or height are not provided, random size between 28-225 is used.
 
-    The user uploads a binary image (multipart/form-data).
-    We convert it using PIL, send it through the resize() logic method, 
-    and return the resized image.
+    Args:
+        file: The image file to resize
+        width: Target width (optional, random if not provided)
+        height: Target height (optional, random if not provided)
+        
+    Returns:
+        StreamingResponse: The resized image as JPEG
     """
-
     try:
+        # Ensure outputs directory exists
+        ensure_output_dir()
+        
         # Read the binary file from UploadFile
         contents = await file.read()
         
@@ -81,16 +101,16 @@ async def resize_image(
         input_path = Path("temp_input.jpg")
         image.save(input_path, format="JPEG")
 
-        # Apply random resize using your utilities
-        resized_img = resize(str(input_path))
+        # Apply resize using your utilities
+        resized_img = resize(str(input_path), width, height)
 
-        # Create a buffer of bytes in memory
+        # Save to outputs folder
+        output_path = Path("outputs") / f"resized_{file.filename}"
+        resized_img.save(output_path, format="JPEG")
+
+        # Create a buffer for streaming response
         img_bytes = io.BytesIO()
-        
-        # Save this buffer as JPEG format
         resized_img.save(img_bytes, format="JPEG")
-        
-        # Return the pointer to the beginning of the buffer
         img_bytes.seek(0)
 
         # Clean up temporary file
@@ -100,13 +120,35 @@ async def resize_image(
         return StreamingResponse(
             img_bytes,
             media_type="image/jpeg",
-            headers={"Content-Disposition": "attachment; filename=resized.jpg"}
+            #headers={"Content-Disposition": f"attachment; filename=resized_{file.filename}"}
         )
 
     except Exception as e:
         return {"error": f"Could not process image: {str(e)}"}
+
+
+# ---------------------------------------------------------
+# Get Output File Endpoint (Optional - to retrieve saved files)
+# ---------------------------------------------------------
+@app.get("/outputs/{filename}")
+async def get_output_file(filename: str):
+    """
+    Retrieve a file from the outputs directory.
     
+    Args:
+        filename: Name of the file to retrieve
+        
+    Returns:
+        FileResponse: The requested file
+    """
+    file_path = Path("outputs") / filename
+    
+    if not file_path.exists():
+        return {"error": "File not found"}
+    
+    return FileResponse(file_path)
+
 
 # Entry point (for direct execution only)
 if __name__ == "__main__":
-    uvicorn.run("api.api:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("api.api:app", host="localhost", port=8000, reload=True)

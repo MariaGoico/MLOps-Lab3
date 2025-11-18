@@ -8,9 +8,10 @@ from logic.utilities import (
     blur,
     random_flip,
     preprocess as preprocess_pipeline,
+    ensure_output_dir,
 )
 from PIL import Image
-
+from pathlib import Path
 
 # ─────────────────────────────
 # MAIN GROUP
@@ -38,24 +39,30 @@ def classify():
 
 @classify.command(
     name="predict",
-    help="Predict a random class from a provided list. "
-         "Example: python cli.py classify predict --classes cat dog fish"
+    help="Predict a random class for an image (using hardcoded classes: dog, cat, bird, fish). "
+         "Example: python -m cli.cli classify predict image.jpg"
 )
-@click.option(
-    "--classes",
-    "-c",
-    multiple=True,
-    required=True,
-    help="List of class names. Pass multiple times: -c cat -c dog -c bird",
-)
-def classify_predict(classes):
+@click.argument("image_path")
+def classify_predict(image_path):
     """
-    Predict a random class from a given list of categories.
+    Predict a random class for a given image.
+    Classes are hardcoded for testing: dog, cat, bird, fish.
 
     Example:
-        python cli.py classify predict -c cat -c dog -c fish
+        python -m cli.cli classify predict image.jpg
     """
+    # Validate image exists
+    img_file = Path(image_path)
+    if not img_file.exists():
+        click.echo(f"Error: Image file '{image_path}' not found.", err=True)
+        return
+    
+    # Hardcoded classes (same as API)
+    classes = ['dog', 'cat', 'bird', 'fish']
+    
+    # Predict
     result = predict(classes)
+    click.echo(f"Image: {image_path}")
     click.echo(f"Predicted class: {result}")
 
 
@@ -70,90 +77,133 @@ def preprocess():
 
 @preprocess.command(
     name="resize",
-    help="Resize an image to a random size between 28 and 225 pixels. "
-         "Example: python cli.py preprocess resize input.jpg output.jpg"
+    help="Resize an image to a specified size (or random 28-225 if not specified). "
+         "Example: python -m cli.cli preprocess resize input.jpg"
 )
 @click.argument("image_path")
-@click.argument("output_path")
-def preprocess_resize(image_path, output_path):
+@click.option("--width", type=int, default=None, help="Target width (random if not specified)")
+@click.option("--height", type=int, default=None, help="Target height (random if not specified)")
+@click.option("--output", "-o", default=None, help="Output path (default: outputs/resized_<filename>)")
+def preprocess_resize(image_path, width, height, output):
     """
-    Resize an image randomly and save the result.
+    Resize an image and save the result.
 
     Args:
         image_path (str): Input image.
-        output_path (str): Path to save resized image.
+        width (int): Target width.
+        height (int): Target height.
+        output (str): Path to save resized image.
     """
-    img = resize(image_path)
-    img.save(output_path)
-    click.echo(f"Saved resized image to: {output_path}")
+    ensure_output_dir()
+    
+    # Generate output path if not provided
+    if output is None:
+        input_file = Path(image_path)
+        output = f"outputs/resized_{input_file.name}"
+    
+    img = resize(image_path, width, height)
+    img.save(output)
+    click.echo(f"Saved resized image to: {output}")
 
-# --- Grayscale Command ---
+
 @preprocess.command(
     name="grayscale",
     help="Convert image to grayscale."
 )
 @click.argument("image_path")
-@click.argument("output_path")
-def preprocess_grayscale(image_path, output_path):
+@click.option("--output", "-o", default=None, help="Output path (default: outputs/grayscale_<filename>)")
+def preprocess_grayscale(image_path, output):
+    """Convert image to grayscale."""
+    ensure_output_dir()
+    
+    if output is None:
+        input_file = Path(image_path)
+        output = f"outputs/grayscale_{input_file.name}"
+    
     img = Image.open(image_path)
     img = to_grayscale(img)
-    img.save(output_path)
-    click.echo(f"Saved grayscale image to: {output_path}")
+    img.save(output)
+    click.echo(f"Saved grayscale image to: {output}")
 
 
-# --- Rotate Command ---
 @preprocess.command(
     name="rotate",
     help="Randomly rotate the image by up to ±20 degrees."
 )
 @click.argument("image_path")
-@click.argument("output_path")
-def preprocess_rotate(image_path, output_path):
+@click.option("--output", "-o", default=None, help="Output path (default: outputs/rotated_<filename>)")
+def preprocess_rotate(image_path, output):
+    """Randomly rotate image."""
+    ensure_output_dir()
+    
+    if output is None:
+        input_file = Path(image_path)
+        output = f"outputs/rotated_{input_file.name}"
+    
     img = Image.open(image_path)
     img = random_rotate(img)
-    img.save(output_path)
-    click.echo(f"Saved rotated image to: {output_path}")
+    img.save(output)
+    click.echo(f"Saved rotated image to: {output}")
 
 
-# --- Flip Command ---
 @preprocess.command(
     name="flip",
     help="Randomly flip the image horizontally (50% probability)."
 )
 @click.argument("image_path")
-@click.argument("output_path")
-def preprocess_flip(image_path, output_path):
+@click.option("--output", "-o", default=None, help="Output path (default: outputs/flipped_<filename>)")
+def preprocess_flip(image_path, output):
+    """Randomly flip image horizontally."""
+    ensure_output_dir()
+    
+    if output is None:
+        input_file = Path(image_path)
+        output = f"outputs/flipped_{input_file.name}"
+    
     img = Image.open(image_path)
     img = random_flip(img)
-    img.save(output_path)
-    click.echo(f"Saved flipped image to: {output_path}")
+    img.save(output)
+    click.echo(f"Saved flipped image to: {output}")
 
 
-# --- Blur Command ---
 @preprocess.command(
     name="blur",
     help="Apply Gaussian blur to the image."
 )
 @click.argument("image_path")
-@click.argument("output_path")
-def preprocess_blur(image_path, output_path):
+@click.option("--output", "-o", default=None, help="Output path (default: outputs/blurred_<filename>)")
+def preprocess_blur(image_path, output):
+    """Apply Gaussian blur."""
+    ensure_output_dir()
+    
+    if output is None:
+        input_file = Path(image_path)
+        output = f"outputs/blurred_{input_file.name}"
+    
     img = Image.open(image_path)
     img = blur(img)
-    img.save(output_path)
-    click.echo(f"Saved blurred image to: {output_path}")
+    img.save(output)
+    click.echo(f"Saved blurred image to: {output}")
 
 
-# --- Full Pipeline Command ---
 @preprocess.command(
     name="pipeline",
     help="Apply full preprocessing pipeline (resize, grayscale, rotate, flip, blur)."
 )
 @click.argument("image_path")
-@click.argument("output_path")
-def preprocess_full_pipeline(image_path, output_path):
+@click.option("--output", "-o", default=None, help="Output path (default: outputs/processed_<filename>)")
+def preprocess_full_pipeline(image_path, output):
+    """Apply full preprocessing pipeline."""
+    ensure_output_dir()
+    
+    if output is None:
+        input_file = Path(image_path)
+        output = f"outputs/processed_{input_file.name}"
+    
     img = preprocess_pipeline(image_path)
-    img.save(output_path)
-    click.echo(f"Saved fully preprocessed image to: {output_path}")
+    img.save(output)
+    click.echo(f"Saved fully preprocessed image to: {output}")
+
 
 # ─────────────────────────────
 # ENTRY POINT
