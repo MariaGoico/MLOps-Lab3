@@ -8,6 +8,7 @@ from fastapi import Request
 from pathlib import Path
 import io
 from PIL import Image
+from PIL import UnidentifiedImageError
 
 from logic.utilities import predict, resize, ensure_output_dir
 
@@ -43,10 +44,10 @@ async def predict_class(
     """
     Predict a random class for an uploaded image.
     The classes are hardcoded for now (dog, cat, frog, horse).
-    
+
     Args:
         file: The image file to classify
-        
+
     Returns:
         dict: The predicted class
     """
@@ -54,18 +55,19 @@ async def predict_class(
         # Read the uploaded file to validate it's an image
         contents = await file.read()
         image = Image.open(io.BytesIO(contents)).convert("RGB")
-        
+
         # Predict (randomly selects one class)
         result = predict(image)
 
-        return {
-            "predicted_class": result,
-            "filename": file.filename
-        }
+        return {"predicted_class": result, "filename": file.filename}
 
-    except Exception as e:
-        return {"error": f"Prediction failed: {str(e)}"}
-    
+    except UnidentifiedImageError:
+        return {"error": "Uploaded file is not a valid image."}
+
+    except OSError as e:
+        return {"error": f"Failed to read the image: {str(e)}"}
+
+
 # ---------------------------------------------------------
 # Resize Endpoint
 # ---------------------------------------------------------
@@ -83,17 +85,17 @@ async def resize_image(
         file: The image file to resize
         width: Target width (optional, random if not provided)
         height: Target height (optional, random if not provided)
-        
+
     Returns:
         StreamingResponse: The resized image as JPEG
     """
     try:
         # Ensure outputs directory exists
         ensure_output_dir()
-        
+
         # Read the binary file from UploadFile
         contents = await file.read()
-        
+
         # Open with PIL and convert to RGB
         image = Image.open(io.BytesIO(contents)).convert("RGB")
 
@@ -120,11 +122,14 @@ async def resize_image(
         return StreamingResponse(
             img_bytes,
             media_type="image/jpeg",
-            #headers={"Content-Disposition": f"attachment; filename=resized_{file.filename}"}
+            # headers={"Content-Disposition": f"attachment; filename=resized_{file.filename}"}
         )
 
-    except Exception as e:
-        return {"error": f"Could not process image: {str(e)}"}
+    except UnidentifiedImageError:
+        return {"error": "Uploaded file is not a valid image."}
+
+    except OSError as e:
+        return {"error": f"Failed to read the image: {str(e)}"}
 
 
 # ---------------------------------------------------------
@@ -134,18 +139,18 @@ async def resize_image(
 async def get_output_file(filename: str):
     """
     Retrieve a file from the outputs directory.
-    
+
     Args:
         filename: Name of the file to retrieve
-        
+
     Returns:
         FileResponse: The requested file
     """
     file_path = Path("outputs") / filename
-    
+
     if not file_path.exists():
         return {"error": "File not found"}
-    
+
     return FileResponse(file_path)
 
 
