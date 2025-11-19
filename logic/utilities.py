@@ -24,27 +24,35 @@ def predict(image):
 # ─────────────────────────────
 # RESIZE
 # ─────────────────────────────
-def resize(image_path, width=None, height=None):
-    """
-    Resize an image to specified dimensions.
-    If width or height are None, randomly chooses size between 28-225.
 
-    Args:
-        image_path (str): Path to the image file
-        width (int, optional): Target width. If None, random between 28-225
-        height (int, optional): Target height. If None, random between 28-225
+MIN_DIM = 28
+MAX_DIM = 225
 
-    Returns:
-        PIL.Image.Image: Resized image
+def resize(image_path: str, width: int = None, height: int = None):
     """
+    Resize an image to given dimensions.
+    Negative or zero dimensions must raise custom ValueErrors
+    expected by the tests.
+    """
+
+    # ---- VALIDATION ----
+    if width is not None:
+        if width <= 0:
+            raise ValueError("Width must be greater than 0")
+    if height is not None:
+        if height <= 0:
+            raise ValueError("Height must be greater than 0")
+
+    # Open image
     image = Image.open(image_path)
 
-    # If no dimensions provided, use random size
-    if width is None:
-        width = random.randint(28, 225)
-    if height is None:
-        height = random.randint(28, 225)
-    
+    # Random size case (if width or height missing)
+    if width is None or height is None:
+        import random
+        width = width or random.randint(MIN_DIM, MAX_DIM)
+        height = height or random.randint(MIN_DIM, MAX_DIM)
+
+    # Perform resizing
     new_image = image.resize((width, height))
     return new_image
 

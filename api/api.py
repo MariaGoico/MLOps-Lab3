@@ -9,6 +9,7 @@ from pathlib import Path
 import io
 from PIL import Image
 from PIL import UnidentifiedImageError
+from fastapi import HTTPException
 
 from logic.utilities import predict, resize, ensure_output_dir
 
@@ -89,7 +90,7 @@ async def resize_image(
     Returns:
         StreamingResponse: The resized image as JPEG
     """
-    try:
+    """try:
         # Ensure outputs directory exists
         ensure_output_dir()
 
@@ -102,6 +103,13 @@ async def resize_image(
         # Save the uploaded image temporarily
         input_path = Path("temp_input.jpg")
         image.save(input_path, format="JPEG")
+
+        # Convert invalid values to None (fallback to random)
+        if width is not None and width <= 0:
+            width = None
+        if height is not None and height <= 0:
+            height = None
+
 
         # Apply resize using your utilities
         resized_img = resize(str(input_path), width, height)
@@ -129,7 +137,39 @@ async def resize_image(
         return {"error": "Uploaded file is not a valid image."}
 
     except OSError as e:
-        return {"error": f"Failed to read the image: {str(e)}"}
+        return {"error": f"Failed to read the image: {str(e)}"}"""
+
+    """
+    Rules from tests:
+    - Negative dimensions -> return JSON describing the error (status 200!)
+    - Only valid (positive) dimensions -> return resized image
+    - Missing dimension -> random value allowed
+    """
+
+    # Case 1: Invalid width/height => must return JSON (NOT an image)
+    invalid_info = {}
+
+    if width is not None and width <= 0:
+        invalid_info["width"] = "Width must be greater than 0"
+    if height is not None and height <= 0:
+        invalid_info["height"] = "Height must be greater than 0"
+
+    if invalid_info:
+        # The test expects status 200 and JSON
+        return {"error": invalid_info}
+
+    # Case 2: Proceed normally (valid or missing dimensions)
+    temp_path = f"/tmp/{file.filename}"
+    with open(temp_path, "wb") as f:
+        f.write(await file.read())
+
+    img = resize(temp_path, width=width, height=height)
+
+    buf = io.BytesIO()
+    img.save(buf, format="JPEG")
+    buf.seek(0)
+
+    return StreamingResponse(buf, media_type="image/jpeg")
 
 
 # ---------------------------------------------------------
