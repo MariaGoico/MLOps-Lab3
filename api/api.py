@@ -196,4 +196,4 @@ async def get_output_file(filename: str):
 
 # Entry point (for direct execution only)
 if __name__ == "__main__":  # pragma: no cover
-    uvicorn.run("api.api:app", host="localhost", port=8000, reload=True)
+    uvicorn.run("api.api:app", host="0.0.0.0", port=8000, reload=True)
