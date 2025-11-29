@@ -13,6 +13,7 @@ from fastapi import HTTPException
 
 from logic.utilities import predict, resize, ensure_output_dir
 
+
 app = FastAPI(
     title="API of the Lab 1 using FastAPI",
     description="API to perform preprocessing on images",
@@ -43,24 +44,32 @@ async def predict_class(
     file: UploadFile = File(...),
 ):
     """
-    Predict a random class for an uploaded image.
-    The classes are hardcoded for now (dog, cat, frog, horse).
+    Predict the class for an uploaded pet image using the trained ONNX model.
 
     Args:
         file: The image file to classify
 
     Returns:
-        dict: The predicted class
+        dict: The predicted class and confidence (if available)
     """
     try:
         # Read the uploaded file to validate it's an image
         contents = await file.read()
         image = Image.open(io.BytesIO(contents)).convert("RGB")
 
-        # Predict (randomly selects one class)
-        result = predict(image)
+        # Predict using the ONNX model
+        result, confidence = predict(image)
 
-        return {"predicted_class": result, "filename": file.filename}
+        response = {
+            "predicted_class": result,
+            "filename": file.filename
+        }
+        
+        # Add confidence if available
+        if confidence is not None:
+            response["confidence"] = round(confidence, 4)
+
+        return response
 
     except UnidentifiedImageError:
         return {"error": "Uploaded file is not a valid image."}

@@ -2,24 +2,70 @@ import random
 from PIL import Image, ImageOps, ImageFilter
 from pathlib import Path
 
+# Import ONNX classifier
+try:
+    from logic.onnx_classifier import classifier
+    CLASSIFIER_AVAILABLE = classifier is not None
+except ImportError:
+    CLASSIFIER_AVAILABLE = False
+    classifier = None
 
 # ─────────────────────────────
 # PREDICTION
 # ─────────────────────────────
-def predict(image):
+def predict_simple(image):
     """
-    Randomly predict a class from the given list of classes.
+    Predict the class of an image using the ONNX model.
+    Falls back to random prediction if model is not available.
 
     Args:
-        classes (list or tuple): List of class names
+        image: PIL Image object or path to image
 
     Returns:
-        str: Randomly selected class name
+        str: Predicted class name
     """
+    # If classifier is available, use it
+    if CLASSIFIER_AVAILABLE and classifier is not None:
+        try:
+            # If image is a path, load it
+            if isinstance(image, (str, Path)):
+                image = Image.open(image)
+            
+            # Make prediction using ONNX model
+            predicted_class = classifier.predict(image)
+            return predicted_class
+        except Exception as e:
+            print(f"Error during prediction: {e}")
+            print("Falling back to random prediction")
+    
+    # Fallback to random prediction (for backward compatibility or if model not available)
     classes = ["cat", "dog", "frog", "horse"]
-
     return random.choice(list(classes))
 
+def predict(image):
+    """
+    Predict the class of an image with confidence score.
+    
+    Args:
+        image: PIL Image object or path to image
+    
+    Returns:
+        tuple: (predicted_class, confidence) or (predicted_class, None) if model unavailable
+    """
+    if CLASSIFIER_AVAILABLE and classifier is not None:
+        try:
+            # If image is a path, load it
+            if isinstance(image, (str, Path)):
+                image = Image.open(image)
+            
+            # Make prediction with confidence
+            predicted_class, confidence = classifier.predict_with_confidence(image)
+            return predicted_class, confidence
+        except Exception as e:
+            print(f"Error during prediction: {e}")
+    
+    # Fallback
+    return predict(image), None
 
 # ─────────────────────────────
 # RESIZE
