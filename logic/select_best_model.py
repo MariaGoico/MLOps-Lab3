@@ -121,7 +121,8 @@ def serialize_to_onnx(best_version):
         dynamic_axes={
             'input': {0: 'batch_size'},
             'output': {0: 'batch_size'}
-        }
+        },
+        verbose=False
     )
     
     print(f" Model exported to {ONNX_MODEL_PATH}")
@@ -132,44 +133,46 @@ def serialize_to_onnx(best_version):
 # ─────────────────────────────
 def save_class_labels(best_version):
     """
-    Download and save the class labels from the best model.
-    
-    Args:
-        best_version: ModelVersion object of the best model
+    Download and save the class labels for the selected model,
+    automatically detecting the correct artifact file.
     """
     client = MlflowClient()
-    
     print("Downloading class labels...")
-    
-    # Find the class labels artifact (look for JSON files)
-    run = client.get_run(best_version.run_id)
-    
-    # Download the class labels artifact
-    # The artifact should be named something like "run_name_class_labels.json"
-    local_path = client.download_artifacts(
-        best_version.run_id, 
-        ""
-    )
-    
-    # Find the JSON file in the downloaded artifacts
-    local_path = Path(local_path)
-    json_files = list(local_path.glob("*class_labels.json"))
-    
-    if not json_files:
-        raise FileNotFoundError("Class labels JSON file not found in artifacts")
-    
-    # Load the class labels
-    with open(json_files[0], 'r') as f:
+
+    # List artifacts
+    artifacts = client.list_artifacts(best_version.run_id)
+    print("Artifacts found:")
+    for art in artifacts:
+        print(" -", art.path)
+
+    # Find any JSON file containing "class_labels"
+    json_candidates = [
+        art.path for art in artifacts
+        if "class_labels" in art.path and art.path.endswith(".json")
+    ]
+
+    if not json_candidates:
+        raise FileNotFoundError("No class_labels JSON file found in artifacts")
+
+    # Use the first match
+    artifact_path = json_candidates[0]
+    print(f"Selected artifact: {artifact_path}")
+
+    # Download it
+    local_path = client.download_artifacts(best_version.run_id, artifact_path)
+
+    with open(local_path, "r") as f:
         class_labels = json.load(f)
-    
+
     # Save to project root
-    with open(CLASS_LABELS_PATH, 'w') as f:
+    with open(CLASS_LABELS_PATH, "w") as f:
         json.dump(class_labels, f, indent=2)
-    
+
     print(f" Class labels saved to {CLASS_LABELS_PATH}")
-    print(f"  Number of classes: {len(class_labels)}")
-    
+    print(f" Number of classes: {len(class_labels)}")
+
     return class_labels
+
 
 
 # ─────────────────────────────

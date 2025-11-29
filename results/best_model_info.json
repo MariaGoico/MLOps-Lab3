@@ -1,0 +1,32 @@
+{
+  "model_version": 3,
+  "run_id": "2e38c7d9a1a844d58d81e4eaa85bf26e",
+  "run_name": "mobilenet_v2_bs32_lr0.0005_ep5",
+  "validation_accuracy": 0.9021739130434783,
+  "num_classes": 37,
+  "onnx_model_path": "./model.onnx",
+  "class_labels_path": "./class_labels.json",
+  "parameters": {
+    "batch_size": "32",
+    "dataset": "OxfordIIITPet",
+    "epochs": "5",
+    "image_size": "224",
+    "learning_rate": "0.0005",
+    "loss_function": "CrossEntropyLoss",
+    "model_name": "mobilenet_v2",
+    "num_classes": "37",
+    "optimizer": "Adam",
+    "seed": "42",
+    "train_split": "0.8"
+  },
+  "metrics": {
+    "final_train_accuracy": 0.9215353260869565,
+    "final_train_loss": 0.3945067202591378,
+    "final_val_accuracy": 0.9021739130434783,
+    "final_val_loss": 0.417473615511604,
+    "train_accuracy": 0.9215353260869565,
+    "train_loss": 0.3945067202591378,
+    "val_accuracy": 0.9021739130434783,
+    "val_loss": 0.417473615511604
+  }
+}

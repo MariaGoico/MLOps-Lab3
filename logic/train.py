@@ -350,7 +350,7 @@ def train_model(config, class_names):
             registered_model_name=MODEL_REGISTRY_NAME
         )
         
-        print(f"\n✓ Training completed for {run_name}")
+        print(f"\nTraining completed for {run_name}")
         print(f"  Final Val Accuracy: {val_accs[-1]:.4f}\n")
 
 
