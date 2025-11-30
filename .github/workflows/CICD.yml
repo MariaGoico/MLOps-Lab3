@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build   # it is not executed if build fails
     env:
-          DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/mlops-lab2:latest
+          DOCKER_IMAGE: ${{ secrets.DOCKERHUB_USERNAME }}/mlops-lab3:latest
     steps:
       - name: Checkout repository (with submodules)
         uses: actions/checkout@v4 
@@ -48,7 +48,7 @@ jobs:
           tags: ${{ env.DOCKER_IMAGE }}
           file: ./Dockerfile
       - name: Trigger Render Deploy
-        run: curl -X POST "https://api.render.com/deploy/srv-d4iobfer433s73a5tsqg?key=${{ secrets.RENDER_DEPLOY_HOOK_KEY }}"
+        run: curl -X POST "https://api.render.com/deploy/srv-d4m1mneuk2gs738m3mp0?key=${{ secrets.RENDER_DEPLOY_HOOK_KEY }}"
 
 
   deploy-hf:
@@ -70,7 +70,7 @@ jobs:
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           HF_USERNAME: ${{ secrets.HF_USERNAME }}
-        run: git remote add huggingface https://${HF_USERNAME}:${HF_TOKEN}@huggingface.co/spaces/${HF_USERNAME}/Lab-2-MLops.git
+        run: git remote add huggingface https://${HF_USERNAME}:${HF_TOKEN}@huggingface.co/spaces/${HF_USERNAME}/MLOps-Lab3.git
 
       - name: Push hf-space branch to Hugging Face
         run: git push huggingface hf-space:main --force
