@@ -30,4 +30,4 @@ explicit = true
 
 [tool.uv.sources]
 torch = { index = "pytorch-cpu" }
-torchvision = { index = "pytorch-cpu" }z
+torchvision = { index = "pytorch-cpu" }
