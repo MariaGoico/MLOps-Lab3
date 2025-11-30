@@ -6,6 +6,7 @@ This module provides a class to load and use ONNX models for image classificatio
 import json
 import numpy as np
 from PIL import Image
+from PIL.Image import Resampling
 import onnxruntime as ort
 from pathlib import Path
 
@@ -41,14 +42,14 @@ class ONNXClassifier:
         self.input_name = self.session.get_inputs()[0].name
         
         # Load class labels
-        with open(class_labels_path, 'r') as f:
+        with open(class_labels_path, 'r', encoding='utf-8') as f:
             self.class_labels = json.load(f)
         
-        print(f"  ONNX Classifier initialized")
+        print("  ONNX Classifier initialized")
         print(f"  Model: {model_path}")
         print(f"  Classes: {len(self.class_labels)}")
     
-    def preprocess(self, image: Image.Image) -> np.ndarray:
+    def preprocess(self, img: Image.Image) -> np.ndarray:
         """
         Preprocess an image for model input.
         
@@ -59,14 +60,14 @@ class ONNXClassifier:
             Preprocessed image as numpy array
         """
         # Convert to RGB if needed
-        if image.mode != 'RGB':
-            image = image.convert('RGB')
+        if img.mode != 'RGB':
+            img = img.convert('RGB')
         
         # Resize to 224x224
-        image = image.resize((224, 224), Image.BILINEAR)
+        img = img.resize((224, 224), Resampling.BILINEAR)
         
         # Convert to numpy array and normalize
-        img_array = np.array(image).astype(np.float32) / 255.0
+        img_array = np.array(img).astype(np.float32) / 255.0
         
         # Normalize with ImageNet mean and std
         mean = np.array([0.485, 0.456, 0.406], dtype=np.float32)
@@ -81,7 +82,7 @@ class ONNXClassifier:
         
         return img_array
     
-    def predict(self, image: Image.Image) -> str:
+    def predict(self, img: Image.Image) -> str:
         """
         Predict the class label for an image.
         
@@ -92,7 +93,7 @@ class ONNXClassifier:
             Predicted class label as string
         """
         # Preprocess image
-        preprocessed = self.preprocess(image)
+        preprocessed = self.preprocess(img)
         
         # Create input dictionary
         inputs = {self.input_name: preprocessed}
@@ -109,7 +110,7 @@ class ONNXClassifier:
         # Return class label
         return self.class_labels[predicted_idx]
     
-    def predict_with_confidence(self, image: Image.Image) -> tuple:
+    def predict_with_confidence(self, img: Image.Image) -> tuple:
         """
         Predict the class label with confidence score.
         
@@ -120,7 +121,7 @@ class ONNXClassifier:
             Tuple of (predicted_class, confidence_score)
         """
         # Preprocess image
-        preprocessed = self.preprocess(image)
+        preprocessed = self.preprocess(img)
         
         # Create input dictionary
         inputs = {self.input_name: preprocessed}
@@ -147,9 +148,10 @@ class ONNXClassifier:
 # SINGLETON INSTANCE
 # ─────────────────────────────
 # Create a global instance that can be imported
+
 _classifier_instance = None
 
-
+# pylint: disable=global-statement
 def get_classifier(model_path: str = "./model.onnx", 
                    class_labels_path: str = "./class_labels.json") -> ONNXClassifier:
     """
@@ -177,33 +179,3 @@ except FileNotFoundError as e:
     print(f"Warning: Could not initialize classifier: {e}")
     print("Make sure to run 'select_best_model.py' first to generate the model files.")
     classifier = None
-
-
-# ─────────────────────────────
-# TESTING
-# ─────────────────────────────
-if __name__ == "__main__":
-    """Test the classifier with a sample image."""
-    import sys
-    
-    if len(sys.argv) < 2:
-        print("Usage: python onnx_classifier.py <image_path>")
-        sys.exit(1)
-    
-    image_path = sys.argv[1]
-    
-    # Load classifier
-    clf = get_classifier()
-    
-    # Load image
-    image = Image.open(image_path)
-    
-    # Get predictions
-    print("\nSingle prediction:")
-    predicted_class = clf.predict(image)
-    print(f"  Predicted class: {predicted_class}")
-    
-    print("\nPrediction with confidence:")
-    predicted_class, confidence = clf.predict_with_confidence(image)
-    print(f"  Predicted class: {predicted_class}")
-    print(f"  Confidence: {confidence:.4f}")

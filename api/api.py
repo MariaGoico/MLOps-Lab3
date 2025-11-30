@@ -9,9 +9,8 @@ from pathlib import Path
 import io
 from PIL import Image
 from PIL import UnidentifiedImageError
-from fastapi import HTTPException
 
-from logic.utilities import predict, resize, ensure_output_dir
+from logic.utilities import predict, resize
 
 
 app = FastAPI(
@@ -60,11 +59,8 @@ async def predict_class(
         # Predict using the ONNX model
         result, confidence = predict(image)
 
-        response = {
-            "predicted_class": result,
-            "filename": file.filename
-        }
-        
+        response = {"predicted_class": result, "filename": file.filename}
+
         # Add confidence if available
         if confidence is not None:
             response["confidence"] = round(confidence, 4)
@@ -98,57 +94,7 @@ async def resize_image(
 
     Returns:
         StreamingResponse: The resized image as JPEG
-    """
-    """try:
-        # Ensure outputs directory exists
-        ensure_output_dir()
-
-        # Read the binary file from UploadFile
-        contents = await file.read()
-
-        # Open with PIL and convert to RGB
-        image = Image.open(io.BytesIO(contents)).convert("RGB")
-
-        # Save the uploaded image temporarily
-        input_path = Path("temp_input.jpg")
-        image.save(input_path, format="JPEG")
-
-        # Convert invalid values to None (fallback to random)
-        if width is not None and width <= 0:
-            width = None
-        if height is not None and height <= 0:
-            height = None
-
-
-        # Apply resize using your utilities
-        resized_img = resize(str(input_path), width, height)
-
-        # Save to outputs folder
-        output_path = Path("outputs") / f"resized_{file.filename}"
-        resized_img.save(output_path, format="JPEG")
-
-        # Create a buffer for streaming response
-        img_bytes = io.BytesIO()
-        resized_img.save(img_bytes, format="JPEG")
-        img_bytes.seek(0)
-
-        # Clean up temporary file
-        input_path.unlink(missing_ok=True)
-
-        # Return the image
-        return StreamingResponse(
-            img_bytes,
-            media_type="image/jpeg",
-            # headers={"Content-Disposition": f"attachment; filename=resized_{file.filename}"}
-        )
-
-    except UnidentifiedImageError:
-        return {"error": "Uploaded file is not a valid image."}
-
-    except OSError as e:
-        return {"error": f"Failed to read the image: {str(e)}"}"""
-
-    """
+    
     Rules from tests:
     - Negative dimensions -> return JSON describing the error (status 200!)
     - Only valid (positive) dimensions -> return resized image
