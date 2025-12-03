@@ -113,18 +113,30 @@ async def resize_image(
         # The test expects status 200 and JSON
         return {"error": invalid_info}
 
-    # Case 2: Proceed normally (valid or missing dimensions)
-    temp_path = f"/tmp/{file.filename}"
-    with open(temp_path, "wb") as f:
-        f.write(await file.read())
+    # Read image directly
+    try:
+        contents = await file.read()
+        image = Image.open(io.BytesIO(contents)).convert("RGB")
+        
+        # If your resize function needs a path, create temp file properly
+        import tempfile
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.jpg') as tmp:
+            image.save(tmp.name)
+            img = resize(tmp.name, width=width, height=height)
+        
+        # Or if resize can take a PIL Image directly:
+        # img = resize(image, width=width, height=height)
 
-    img = resize(temp_path, width=width, height=height)
+        buf = io.BytesIO()
+        img.save(buf, format="JPEG")
+        buf.seek(0)
 
-    buf = io.BytesIO()
-    img.save(buf, format="JPEG")
-    buf.seek(0)
-
-    return StreamingResponse(buf, media_type="image/jpeg")
+        return StreamingResponse(buf, media_type="image/jpeg")
+        
+    except UnidentifiedImageError:
+        return {"error": "Uploaded file is not a valid image."}
+    except Exception as e:
+        return {"error": f"Failed to process image: {str(e)}"}
 
 
 # ---------------------------------------------------------

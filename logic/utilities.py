@@ -1,6 +1,7 @@
 import random
 from PIL import Image, ImageOps, ImageFilter
 from pathlib import Path
+import json
 
 # Import ONNX classifier
 try:
@@ -11,6 +12,24 @@ except ImportError:
     CLASSIFIER_AVAILABLE = False
     classifier = None
 
+# Load class labels from JSON
+CLASS_LABELS_PATH = Path(__file__).parent.parent / "class_labels.json"
+try:
+    with open(CLASS_LABELS_PATH) as f:
+        CLASS_LABELS = json.load(f)
+except (FileNotFoundError, json.JSONDecodeError):
+    # Fallback if file not found
+    CLASS_LABELS = [
+        "Abyssinian", "American Bulldog", "American Pit Bull Terrier",
+        "Basset Hound", "Beagle", "Bengal", "Birman", "Bombay", "Boxer",
+        "British Shorthair", "Chihuahua", "Egyptian Mau", "English Cocker Spaniel",
+        "English Setter", "German Shorthaired", "Great Pyrenees", "Havanese",
+        "Japanese Chin", "Keeshond", "Leonberger", "Maine Coon",
+        "Miniature Pinscher", "Newfoundland", "Persian", "Pomeranian",
+        "Pug", "Ragdoll", "Russian Blue", "Saint Bernard", "Samoyed",
+        "Scottish Terrier", "Shiba Inu", "Siamese", "Sphynx",
+        "Staffordshire Bull Terrier", "Wheaten Terrier", "Yorkshire Terrier"
+    ]
 
 # ─────────────────────────────
 # PREDICTION
@@ -41,8 +60,7 @@ def predict_simple(image):
             print("Falling back to random prediction")
 
     # Fallback to random prediction (for backward compatibility or if model not available)
-    classes = ["cat", "dog", "frog", "horse"]
-    return random.choice(list(classes))
+    return random.choice(CLASS_LABELS)
 
 
 def predict(image):

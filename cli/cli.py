@@ -55,11 +55,8 @@ def classify_predict(image_path):
         click.echo(f"Error: Image file '{image_path}' not found.", err=True)
         return
 
-    # Hardcoded classes (same as API)
-    classes = ["dog", "cat", "frog", "horse"]
-
     # Predict
-    result = predict(classes)
+    result = predict(image_path)
     click.echo(f"Image: {image_path}")
     click.echo(f"Predicted class: {result}")
 

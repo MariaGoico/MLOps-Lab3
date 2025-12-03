@@ -1,5 +1,6 @@
 import io
 import pytest
+import json
 from pathlib import Path
 from PIL import Image
 from fastapi.testclient import TestClient
@@ -40,6 +41,30 @@ def tmp_outputs_dir(tmp_path, monkeypatch):
     monkeypatch.setattr("api.api.Path", custom_path)
     return outputs
 
+@pytest.fixture(scope="session")
+def expected_classes():
+    """Load class_labels.json or return fallback class names."""
+
+    class_labels_path = Path("class_labels.json")
+
+    if class_labels_path.exists():
+        with open(class_labels_path) as f:
+            return json.load(f)
+
+    # Fallback for CI or environments without the file
+    return [
+        "Abyssinian", "American Bulldog", "American Pit Bull Terrier",
+        "Basset Hound", "Beagle", "Bengal", "Birman", "Bombay", "Boxer",
+        "British Shorthair", "Chihuahua", "Egyptian Mau",
+        "English Cocker Spaniel", "English Setter", "German Shorthaired",
+        "Great Pyrenees", "Havanese", "Japanese Chin", "Keeshond",
+        "Leonberger", "Maine Coon", "Miniature Pinscher", "Newfoundland",
+        "Persian", "Pomeranian", "Pug", "Ragdoll", "Russian Blue",
+        "Saint Bernard", "Samoyed", "Scottish Terrier", "Shiba Inu",
+        "Siamese", "Sphynx", "Staffordshire Bull Terrier",
+        "Wheaten Terrier", "Yorkshire Terrier",
+    ]
+
 
 # -----------------------------
 # Home page
@@ -54,18 +79,18 @@ def test_home_page():
 # -----------------------------
 # Predict endpoint
 # -----------------------------
-def test_predict_endpoint(test_image_bytes):
+def test_predict_endpoint(test_image_bytes, expected_classes):
     """Test predict endpoint with real image."""
     files = {"file": ("test.jpg", test_image_bytes, "image/jpeg")}
     response = client.post("/predict", files=files)
     assert response.status_code == 200
     data = response.json()
     assert "predicted_class" in data
-    assert data["predicted_class"] in ["dog", "cat", "frog", "horse"]
+    assert data["predicted_class"] in expected_classes
     assert data["filename"] == "test.jpg"
 
 
-@patch("api.api.predict", return_value="dog")  # ← Patch donde se USA, no donde se define
+@patch("api.api.predict", return_value=("Bengali", 0.97))  # ← Patch donde se USA, no donde se define
 def test_predict_endpoint_mocked(mock_predict, test_image_bytes):
     """Test predict endpoint with mocked prediction."""
     files = {"file": ("test.jpg", test_image_bytes, "image/jpeg")}
@@ -73,7 +98,7 @@ def test_predict_endpoint_mocked(mock_predict, test_image_bytes):
     data = response.json()
     
     assert response.status_code == 200
-    assert data["predicted_class"] == "dog"
+    assert data["predicted_class"] == "Bengali"
     assert data["filename"] == "test.jpg"
     mock_predict.assert_called_once()
 

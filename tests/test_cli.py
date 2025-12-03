@@ -1,4 +1,5 @@
 import pytest
+import json
 from click.testing import CliRunner
 from pathlib import Path
 from PIL import Image
@@ -51,6 +52,30 @@ def mock_outputs_dir(tmp_path, monkeypatch):
     
     return outputs
 
+@pytest.fixture(scope="session")
+def expected_classes():
+    """Load class_labels.json or return fallback class names."""
+
+    class_labels_path = Path("class_labels.json")
+
+    if class_labels_path.exists():
+        with open(class_labels_path) as f:
+            return json.load(f)
+
+    # Fallback for CI or environments without the file
+    return [
+        "Abyssinian", "American Bulldog", "American Pit Bull Terrier",
+        "Basset Hound", "Beagle", "Bengal", "Birman", "Bombay", "Boxer",
+        "British Shorthair", "Chihuahua", "Egyptian Mau",
+        "English Cocker Spaniel", "English Setter", "German Shorthaired",
+        "Great Pyrenees", "Havanese", "Japanese Chin", "Keeshond",
+        "Leonberger", "Maine Coon", "Miniature Pinscher", "Newfoundland",
+        "Persian", "Pomeranian", "Pug", "Ragdoll", "Russian Blue",
+        "Saint Bernard", "Samoyed", "Scottish Terrier", "Shiba Inu",
+        "Siamese", "Sphynx", "Staffordshire Bull Terrier",
+        "Wheaten Terrier", "Yorkshire Terrier",
+    ]
+
 
 # ═════════════════════════════════════════════════════════════
 # CLASSIFY GROUP TESTS
@@ -59,7 +84,7 @@ def mock_outputs_dir(tmp_path, monkeypatch):
 # -----------------------------
 # classify predict command
 # -----------------------------
-def test_classify_predict_success(runner, test_image):
+def test_classify_predict_success(runner, test_image, expected_classes):
     """Test successful prediction with valid image."""
     result = runner.invoke(cli, ["classify", "predict", str(test_image)])
     
@@ -67,7 +92,7 @@ def test_classify_predict_success(runner, test_image):
     assert "Predicted class:" in result.output
     assert str(test_image) in result.output
     # Check that it's one of the hardcoded classes
-    assert any(cls in result.output for cls in ["dog", "cat", "frog", "horse"])
+    assert any(cls in result.output for cls in expected_classes)
 
 
 def test_classify_predict_nonexistent_image(runner):
@@ -78,13 +103,13 @@ def test_classify_predict_nonexistent_image(runner):
     assert "Error: Image file 'nonexistent.jpg' not found" in result.output
 
 
-@patch("cli.cli.predict", return_value="dog")
+@patch("cli.cli.predict", return_value="Bengali")
 def test_classify_predict_mocked(mock_predict, runner, test_image):
     """Test prediction with mocked predict function."""
     result = runner.invoke(cli, ["classify", "predict", str(test_image)])
     
     assert result.exit_code == 0
-    assert "Predicted class: dog" in result.output
+    assert "Predicted class: Bengali" in result.output
     mock_predict.assert_called_once()
 
 
