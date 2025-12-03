@@ -4,7 +4,7 @@ from PIL import Image
 import io
 
 # Base URL of your FastAPI deployment
-API_URL = "https://goico-mlops-lab2-latest.onrender.com"
+API_URL = "https://goico-mlops-lab3-latest.onrender.com"
 
 # Function to call /predict
 def predict_image(image):
