@@ -35,8 +35,8 @@ COPY api ./api
 COPY logic ./logic
 COPY templates ./templates
 COPY static ./static
-COPY model.onnx ./model.onnx
-COPY class_labels.json ./class_labels.json
+COPY model.onnx model.onnx
+COPY class_labels.json class_labels.json
 COPY results ./results
 # Expose the port associated with the API created with FastAPI
 EXPOSE 8000
