@@ -135,7 +135,7 @@ async def resize_image(
         
     except UnidentifiedImageError:
         return {"error": "Uploaded file is not a valid image."}
-    except Exception as e:
+    except Exception as e: # pylint: disable=broad-exception-caught
         return {"error": f"Failed to process image: {str(e)}"}
 
 

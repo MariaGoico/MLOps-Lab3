@@ -31,3 +31,8 @@ explicit = true
 [tool.uv.sources]
 torch = { index = "pytorch-cpu" }
 torchvision = { index = "pytorch-cpu" }
+
+[tool.coverage.run]
+omit = ["logic/train.py",
+        "__init__.py",
+        "logic/select_best_model.py"]

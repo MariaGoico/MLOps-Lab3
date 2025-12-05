@@ -15,7 +15,7 @@ except ImportError:
 # Load class labels from JSON
 CLASS_LABELS_PATH = Path(__file__).parent.parent / "class_labels.json"
 try:
-    with open(CLASS_LABELS_PATH) as f:
+    with open(CLASS_LABELS_PATH, encoding='utf-8') as f:
         CLASS_LABELS = json.load(f)
 except (FileNotFoundError, json.JSONDecodeError):
     # Fallback if file not found
