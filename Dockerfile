@@ -35,7 +35,6 @@ COPY api/ ./api/
 COPY logic/ ./logic/
 COPY static/ ./static/
 COPY templates/ ./templates/
-COPY main.py .
 
 # **CRITICAL: Copy your model files**
 COPY model.onnx .
