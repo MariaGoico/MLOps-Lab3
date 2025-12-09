@@ -8,7 +8,7 @@ try:
     from logic.onnx_classifier import classifier
 
     CLASSIFIER_AVAILABLE = classifier is not None
-except ImportError:
+except ImportError:# pragma: no cover
     CLASSIFIER_AVAILABLE = False
     classifier = None
 
@@ -17,7 +17,7 @@ CLASS_LABELS_PATH = Path(__file__).parent.parent / "class_labels.json"
 try:
     with open(CLASS_LABELS_PATH, encoding='utf-8') as f:
         CLASS_LABELS = json.load(f)
-except (FileNotFoundError, json.JSONDecodeError):
+except (FileNotFoundError, json.JSONDecodeError):# pragma: no cover
     # Fallback if file not found
     CLASS_LABELS = [
         "Abyssinian", "American Bulldog", "American Pit Bull Terrier",

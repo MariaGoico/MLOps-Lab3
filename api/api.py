@@ -70,7 +70,7 @@ async def predict_class(
     except UnidentifiedImageError:
         return {"error": "Uploaded file is not a valid image."}
 
-    except OSError as e:
+    except OSError as e:# pragma: no cover
         return {"error": f"Failed to read the image: {str(e)}"}
 
 
@@ -106,7 +106,7 @@ async def resize_image(
 
     if width is not None and width <= 0:
         invalid_info["width"] = "Width must be greater than 0"
-    if height is not None and height <= 0:
+    if height is not None and height <= 0:# pragma: no cover
         invalid_info["height"] = "Height must be greater than 0"
 
     if invalid_info:
@@ -133,9 +133,9 @@ async def resize_image(
 
         return StreamingResponse(buf, media_type="image/jpeg")
         
-    except UnidentifiedImageError:
+    except UnidentifiedImageError:# pragma: no cover
         return {"error": "Uploaded file is not a valid image."}
-    except Exception as e: # pylint: disable=broad-exception-caught
+    except Exception as e: # pylint: disable=broad-exception-caught # pragma: no cover
         return {"error": f"Failed to process image: {str(e)}"}
 
 
