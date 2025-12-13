@@ -13,9 +13,7 @@ from PIL import Image
 from pathlib import Path
 
 
-# ─────────────────────────────
 # MAIN GROUP
-# ─────────────────────────────
 @click.group(help="Main CLI tool for image classification utilities.")
 def cli():
     """
@@ -27,9 +25,7 @@ def cli():
     """
 
 
-# ─────────────────────────────
 # CLASSIFICATION GROUP
-# ─────────────────────────────
 @cli.group(help="Commands related to classification.")
 def classify():
     """Group for prediction-related commands."""
@@ -61,9 +57,7 @@ def classify_predict(image_path):
     click.echo(f"Predicted class: {result}")
 
 
-# ─────────────────────────────
 # PREPROCESSING GROUP
-# ─────────────────────────────
 @cli.group(help="Commands related to preprocessing images.")
 def preprocess():
     """Group for preprocessing commands."""
@@ -225,8 +219,6 @@ def preprocess_full_pipeline(image_path, output):
     click.echo(f"Saved fully preprocessed image to: {output}")
 
 
-# ─────────────────────────────
 # ENTRY POINT
-# ─────────────────────────────
 if __name__ == "__main__":  # pragma: no cover
     cli()

@@ -31,9 +31,7 @@ except (FileNotFoundError, json.JSONDecodeError):# pragma: no cover
         "Staffordshire Bull Terrier", "Wheaten Terrier", "Yorkshire Terrier"
     ]
 
-# ─────────────────────────────
 # PREDICTION
-# ─────────────────────────────
 def predict_simple(image):
     """
     Predict the class of an image using the ONNX model.
@@ -89,9 +87,7 @@ def predict(image):
     return predict_simple(image), None
 
 
-# ─────────────────────────────
 # RESIZE
-# ─────────────────────────────
 
 MIN_DIM = 28
 MAX_DIM = 225
@@ -125,9 +121,7 @@ def resize(image_path: str, width: int = None, height: int = None):
     return new_image
 
 
-# ─────────────────────────────
 # PREPROCESSING FUNCTIONS
-# ─────────────────────────────
 def to_grayscale(image: Image.Image) -> Image.Image:
     """Convert an image to grayscale."""
     return ImageOps.grayscale(image)
@@ -178,9 +172,7 @@ def preprocess(image_path):
     return image
 
 
-# ─────────────────────────────
 # UTILITY FUNCTIONS
-# ─────────────────────────────
 def ensure_output_dir():
     """Ensure the outputs directory exists."""
     output_dir = Path("outputs")

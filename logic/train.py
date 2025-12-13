@@ -15,9 +15,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-# ─────────────────────────────
 # CONFIGURATION
-# ─────────────────────────────
 SEED = 42
 EXPERIMENT_NAME = "oxford_pet_classification"
 MODEL_REGISTRY_NAME = "pet_classifier"
@@ -47,9 +45,7 @@ CONFIGS = [
 ]
 
 
-# ─────────────────────────────
 # SETUP
-# ─────────────────────────────
 def set_seed(seed=SEED):
     """Set random seeds for reproducibility."""
     torch.manual_seed(seed)
@@ -65,9 +61,7 @@ def setup_directories():
     Path(PLOTS_DIR).mkdir(exist_ok=True)
 
 
-# ─────────────────────────────
 # DATA PREPARATION
-# ─────────────────────────────
 def prepare_data(batch_size, train_split=0.8):
     """
     Prepare the Oxford-IIIT Pet dataset with train/validation split.
@@ -123,9 +117,7 @@ def prepare_data(batch_size, train_split=0.8):
     return train_loader, val_loader, class_names
 
 
-# ─────────────────────────────
 # MODEL PREPARATION
-# ─────────────────────────────
 def prepare_model(model_name, num_classes):
     """
     Prepare a model for transfer learning.
@@ -155,9 +147,7 @@ def prepare_model(model_name, num_classes):
     return model
 
 
-# ─────────────────────────────
 # TRAINING
-# ─────────────────────────────
 def train_epoch(model, train_loader, criterion, optimizer, device):
     """Train for one epoch."""
     model.train()
@@ -356,9 +346,7 @@ def train_model(config, class_names):
         print(f"  Final Val Accuracy: {val_accs[-1]:.4f}\n")
 
 
-# ─────────────────────────────
 # MAIN
-# ─────────────────────────────
 def main():
     """Main training function."""
     # Setup

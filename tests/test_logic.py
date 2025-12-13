@@ -52,9 +52,7 @@ def dummy_image(tmp_path):
     return img_path
 
 
-# ─────────────────────────────
 # PREDICT_SIMPLE
-# ─────────────────────────────
 @patch("logic.utilities.CLASSIFIER_AVAILABLE", False)
 def test_predict_simple_returns_valid_class(dummy_image, expected_classes):
     """Test that predict_simple returns one of the valid classes from class_labels.json."""
@@ -98,9 +96,7 @@ def test_predict_simple_fallback_on_error(mock_classifier, dummy_image, expected
     assert result in expected_classes
 
 
-# ─────────────────────────────
 # PREDICT (with confidence)
-# ─────────────────────────────
 @patch("logic.utilities.CLASSIFIER_AVAILABLE", False)
 def test_predict_returns_tuple(dummy_image):
     """Test that predict returns a tuple of (class, confidence)."""
@@ -179,9 +175,7 @@ def test_predict_returns_valid_class_from_labels(mock_classifier, dummy_image, e
     assert confidence == 0.92
 
 
-# ─────────────────────────────
 # RESIZE
-# ─────────────────────────────
 def test_resize_specific_dimensions(dummy_image):
     """Test resize with specific width and height."""
     img = resize(dummy_image, width=50, height=60)
@@ -233,9 +227,7 @@ def test_resize_zero_height(dummy_image):
         resize(dummy_image, width=50, height=0)
 
 
-# ─────────────────────────────
 # PREPROCESSING FUNCTIONS
-# ─────────────────────────────
 def test_to_grayscale(dummy_image):
     """Test grayscale conversion."""
     img = Image.open(dummy_image)
@@ -319,9 +311,7 @@ def test_blur(dummy_image):
     assert isinstance(blurred, Image.Image)
 
 
-# ─────────────────────────────
 # PREPROCESS PIPELINE
-# ─────────────────────────────
 def test_preprocess_returns_image(dummy_image):
     """Test that preprocess returns a PIL Image."""
     output = preprocess(dummy_image)
@@ -361,9 +351,7 @@ def test_preprocess_call_order(
     mock_blur.assert_called_once()
 
 
-# ─────────────────────────────
 # UTILITY FUNCTIONS
-# ─────────────────────────────
 def test_ensure_output_dir(tmp_path, monkeypatch):
     """Test that ensure_output_dir creates the directory."""
     monkeypatch.chdir(tmp_path)
@@ -382,9 +370,7 @@ def test_ensure_output_dir_idempotent(tmp_path, monkeypatch):
     assert out1.exists()
 
 
-# ─────────────────────────────
 # CLASS LABELS VALIDATION
-# ─────────────────────────────
 def test_class_labels_loaded(expected_classes):
     """Test that we have the expected number of classes."""
     assert len(expected_classes) == 37

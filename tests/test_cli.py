@@ -9,9 +9,7 @@ import io
 from cli.cli import cli
 
 
-# -----------------------------
 # Fixtures
-# -----------------------------
 @pytest.fixture
 def runner():
     """Create a CliRunner instance for testing Click commands."""
@@ -81,9 +79,7 @@ def expected_classes():
 # CLASSIFY GROUP TESTS
 # ═════════════════════════════════════════════════════════════
 
-# -----------------------------
 # classify predict command
-# -----------------------------
 def test_classify_predict_success(runner, test_image, expected_classes):
     """Test successful prediction with valid image."""
     result = runner.invoke(cli, ["classify", "predict", str(test_image)])
@@ -117,9 +113,7 @@ def test_classify_predict_mocked(mock_predict, runner, test_image):
 # PREPROCESS GROUP TESTS
 # ═════════════════════════════════════════════════════════════
 
-# -----------------------------
 # preprocess resize command
-# -----------------------------
 def test_preprocess_resize_with_dimensions(runner, test_image, tmp_path):
     """Test resize with explicit width and height."""
     output_path = tmp_path / "resized.jpg"
@@ -183,9 +177,7 @@ def test_preprocess_resize_mocked(mock_resize, runner, test_image, tmp_path):
     mock_resize.assert_called_once()
 
 
-# -----------------------------
 # preprocess grayscale command
-# -----------------------------
 def test_preprocess_grayscale(runner, test_image, tmp_path):
     """Test grayscale conversion."""
     output_path = tmp_path / "grayscale.jpg"
@@ -211,9 +203,7 @@ def test_preprocess_grayscale_default_output(runner, test_image, mock_outputs_di
     assert "Saved grayscale image to:" in result.output
 
 
-# -----------------------------
 # preprocess rotate command
-# -----------------------------
 def test_preprocess_rotate(runner, test_image, tmp_path):
     """Test random rotation."""
     output_path = tmp_path / "rotated.jpg"
@@ -253,9 +243,7 @@ def test_preprocess_rotate_default_output(runner, test_image, mock_outputs_dir):
     assert result.exit_code == 0
     assert "Saved rotated image to:" in result.output
 
-# -----------------------------
 # preprocess flip command
-# -----------------------------
 def test_preprocess_flip(runner, test_image, tmp_path):
     """Test random horizontal flip."""
     output_path = tmp_path / "flipped.jpg"
@@ -291,9 +279,7 @@ def test_preprocess_flip_default_output(runner, test_image, mock_outputs_dir):
     assert result.exit_code == 0
     assert "Saved flipped image to:" in result.output
 
-# -----------------------------
 # preprocess blur command
-# -----------------------------
 def test_preprocess_blur(runner, test_image, tmp_path):
     """Test Gaussian blur."""
     output_path = tmp_path / "blurred.jpg"
@@ -329,9 +315,7 @@ def test_preprocess_blur_default_output(runner, test_image, mock_outputs_dir):
     assert result.exit_code == 0
     assert "Saved blurred image to:" in result.output
 
-# -----------------------------
 # preprocess pipeline command
-# -----------------------------
 def test_preprocess_pipeline(runner, test_image, tmp_path):
     """Test full preprocessing pipeline."""
     output_path = tmp_path / "processed.jpg"

@@ -144,9 +144,7 @@ class ONNXClassifier:
         return predicted_class, confidence
 
 
-# ─────────────────────────────
 # SINGLETON INSTANCE
-# ─────────────────────────────
 # Create a global instance that can be imported
 
 _classifier_instance = None

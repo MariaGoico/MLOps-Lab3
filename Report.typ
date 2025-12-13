@@ -205,19 +205,11 @@ The test suite uses `unittest.mock` to:
 - Patch file system paths for isolated testing
 - Mock image processing functions to test integration without full pipeline execution
 
-```bash
-================================== tests coverage ==============================
-______________ coverage: platform win32, python 3.11.13-final-0 ______________
-Name                       Stmts   Miss  Cover
-----------------------------------------------
-api\api.py                    54      0   100%
-cli\cli.py                    92      0   100%
-logic\onnx_classifier.py      51      0   100%
-logic\utilities.py            72      0   100%
-----------------------------------------------
-TOTAL                        269      0   100%
-=============================== 72 passed in 2.40s ================================ 
-```
+COVERAGE
+#image("screenshots/tests.png")
+LINT
+#image("screenshots/lint.png")
+
 
 = Experiments Conducted
 
@@ -313,11 +305,11 @@ Based on the `final_val_accuracy` metric comparison, the models ranked as follow
     columns: 4,
     align: (left, center, center, center),
     [*Metric*], [*Best Model*], [*Second Best*], [*Third Best*],
-    [Run Name], [...bs32\_lr0.0005_ep5], [...bs32\_lr0.001_ep3], [...bs64\_lr0.0001_ep3],
-    [Validation Accuracy], [~90%], [~89%], [~77%],
-    [Training Accuracy], [~91%], [~91%], [~67%],
-    [Final Val Loss], [~0.40], [~0.40], [~2.12],
-    [Final Train Loss], [~0.30], [~0.30], [~0.94],
+    [Run Name], [*...bs32\_lr0.0005_ep5*], [...bs32\_lr0.001_ep3], [...bs64\_lr0.0001_ep3],
+    [Validation Accuracy], [*~90%*], [~89%], [~77%],
+    [Training Accuracy], [*~91%*], [~91%], [~67%],
+    [Final Val Loss], [*~0.40*], [~0.40], [~2.12],
+    [Final Train Loss], [*~0.30*], [~0.30], [~0.94],
   ),
   caption: "Model performance comparison from MLFlow UI"
 )

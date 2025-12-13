@@ -9,26 +9,20 @@ import torch
 import json
 from pathlib import Path
 
-# ─────────────────────────────
 # CONFIGURATION
-# ─────────────────────────────
 MODEL_REGISTRY_NAME = "pet_classifier"
 ONNX_MODEL_PATH = "./model.onnx"
 CLASS_LABELS_PATH = "./class_labels.json"
 RESULTS_DIR = "./results"
 
 
-# ─────────────────────────────
 # SETUP
-# ─────────────────────────────
 def setup_directories():
     """Create necessary directories."""
     Path(RESULTS_DIR).mkdir(exist_ok=True)
 
 
-# ─────────────────────────────
 # MODEL SELECTION
-# ─────────────────────────────
 def select_best_model():
     """
     Query MLFlow registry to find the best model based on validation accuracy.
@@ -82,9 +76,7 @@ def select_best_model():
     return best_version, best_accuracy
 
 
-# ─────────────────────────────
 # MODEL SERIALIZATION
-# ─────────────────────────────
 def serialize_to_onnx(best_version):
     """
     Load the best model and serialize it to ONNX format.
@@ -125,9 +117,7 @@ def serialize_to_onnx(best_version):
     print(f" Model exported to {ONNX_MODEL_PATH}")
 
 
-# ─────────────────────────────
 # CLASS LABELS EXTRACTION
-# ─────────────────────────────
 def save_class_labels(best_version):
     """
     Download and save the class labels for the selected model,
@@ -172,9 +162,7 @@ def save_class_labels(best_version):
     return class_labels
 
 
-# ─────────────────────────────
 # SAVE RESULTS
-# ─────────────────────────────
 def save_results(best_version, best_accuracy, class_labels):
     """
     Save information about the selected model.
@@ -206,9 +194,7 @@ def save_results(best_version, best_accuracy, class_labels):
     print(f" Results saved to {results_path}")
 
 
-# ─────────────────────────────
 # MAIN
-# ─────────────────────────────
 def main():
     """Main function to select and serialize the best model."""
     setup_directories()

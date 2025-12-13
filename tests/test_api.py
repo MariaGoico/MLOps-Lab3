@@ -11,9 +11,7 @@ from api.api import app
 client = TestClient(app)
 
 
-# -----------------------------
 # Fixtures
-# -----------------------------
 @pytest.fixture
 def test_image_bytes():
     """Create a simple in-memory RGB image."""
@@ -66,9 +64,7 @@ def expected_classes():
     ]
 
 
-# -----------------------------
 # Home page
-# -----------------------------
 def test_home_page():
     """Test that home page returns HTML."""
     response = client.get("/")
@@ -76,9 +72,7 @@ def test_home_page():
     assert "text/html" in response.headers["content-type"]
 
 
-# -----------------------------
 # Predict endpoint
-# -----------------------------
 def test_predict_endpoint(test_image_bytes, expected_classes):
     """Test predict endpoint with real image."""
     files = {"file": ("test.jpg", test_image_bytes, "image/jpeg")}
@@ -112,9 +106,7 @@ def test_predict_endpoint_invalid_file():
     assert "error" in data
 
 
-# -----------------------------
 # Resize endpoint
-# -----------------------------
 def test_resize_endpoint_fixed_size(test_image_bytes, tmp_outputs_dir):
     """Test resize with explicit width and height."""
     files = {"file": ("test.jpg", test_image_bytes, "image/jpeg")}
@@ -169,9 +161,7 @@ def test_resize_endpoint_invalid_dimensions(test_image_bytes, tmp_outputs_dir):
     assert "error" in data
 
 
-# -----------------------------
 # Get output file endpoint
-# -----------------------------
 def test_get_output_file_existing(tmp_outputs_dir):
     """Test retrieving an existing file from outputs."""
     file_path = tmp_outputs_dir / "sample.jpg"

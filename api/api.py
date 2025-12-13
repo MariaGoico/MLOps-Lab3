@@ -24,9 +24,9 @@ templates = Jinja2Templates(directory="templates")
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-# ---------------------------------------------------------
+
 # Home Page
-# ---------------------------------------------------------
+
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
     """
@@ -35,9 +35,9 @@ async def home(request: Request):
     return templates.TemplateResponse(request, "index.html", {"request": request})
 
 
-# ---------------------------------------------------------
+
 # Predict Endpoint
-# ---------------------------------------------------------
+
 @app.post("/predict")
 async def predict_class(
     file: UploadFile = File(...),
@@ -74,9 +74,9 @@ async def predict_class(
         return {"error": f"Failed to read the image: {str(e)}"}
 
 
-# ---------------------------------------------------------
+
 # Resize Endpoint
-# ---------------------------------------------------------
+
 @app.post("/resize")
 async def resize_image(
     file: UploadFile = File(...),
@@ -139,9 +139,9 @@ async def resize_image(
         return {"error": f"Failed to process image: {str(e)}"}
 
 
-# ---------------------------------------------------------
+
 # Get Output File Endpoint (Optional - to retrieve saved files)
-# ---------------------------------------------------------
+
 @app.get("/outputs/{filename}")
 async def get_output_file(filename: str):
     """
