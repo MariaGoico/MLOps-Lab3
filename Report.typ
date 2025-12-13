@@ -368,29 +368,23 @@ ONNX Runtime integration:
 - Prediction with class label mapping
 - API integration for production deployment
 
-= #highlight([Challenges and Solutions])
-== Python Version Compatibility
+= Services Working
 
-*Challenge:* PyTorch compatibility issues with Python 3.13
+== DockerHub
+#image("screenshots/dockerhub.png")
+== Render
+#image("screenshots/render.png")
+#image("screenshots/render2.png")
+== HuggingFace
+#image("screenshots/hug1.png")
+#image("screenshots/hug2.png")
 
-*Solution:* Downgraded to Python 3.11 using `uv python pin 3.11`
-
-== Pylint Warnings
-
-*Challenge:* Pylint false positives with PyTorch dynamic members
-
-*Solution:* Created `.pylintrc` configuration file with PyTorch whitelist
-
-== Git Repository Management
-
-*Challenge:* Large experiment artifacts and datasets
-
-*Solution:* Updated `.gitignore` to exclude `data/`, `mlruns/`, `plots/`, and `results/` directories
+= Challenges and Solutions
 
 == Docker 
 
-*Challenge:* Takes too long to build
+*Challenge:* Took too long to build and deployment failed.
 
-*Solution:* Modified the pytorch version 
+*Solution:* Modified the pytorch version so that it does not include the nvidia CUDA libraries since our model will only be used for inference and no further training will be performed.
 
 
